@@ -10,6 +10,17 @@ import ssl
 from .exceptions import ConnectionClosed, format_close
 from .legacy.client import connect
 
+import logging
+logger = logging.getLogger('websockets')
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+
+fh = logging.FileHandler('ws.log', mode="w")
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 if sys.platform == "win32":
 
@@ -110,7 +121,7 @@ async def run_client(
         ssl_context = True # default
 
     try:
-        websocket = await connect(uri, ssl=ssl_context)
+        websocket = await connect(uri, ssl=ssl_context, ping_interval=11, ping_timeout=10)
     except Exception as exc:
         print_over_input(f"Failed to connect to {uri}: {exc}.")
         exit_from_event_loop_thread(loop, stop)
@@ -232,4 +243,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    print("Running local copy")
     main()
